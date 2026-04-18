@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "Ly-ion",
+    "slug": "lyion",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#003DA5"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.lyion.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "La caméra est nécessaire pour scanner les QR codes des bornes Ly-ion."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#003DA5"
+      },
+      "package": "com.lyion.app",
+      "permissions": ["CAMERA"]
+    },
+    "plugins": [
+      [
+        "expo-barcode-scanner",
+        {
+          "cameraPermission": "Autoriser Ly-ion à accéder à la caméra pour scanner les QR codes."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "replace-with-your-eas-project-id"
+      }
+    }
+  }
+}

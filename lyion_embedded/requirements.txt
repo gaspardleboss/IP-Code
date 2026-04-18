@@ -1,0 +1,8 @@
+# Ly-ion embedded system Python dependencies
+# Install with: pip3 install -r requirements.txt
+
+mfrc522==0.0.7
+rpi_ws281x==5.0.0
+adafruit-circuitpython-mcp230xx==2.5.16
+requests==2.32.3
+python-dotenv==1.0.1
