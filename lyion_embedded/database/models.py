@@ -21,8 +21,9 @@ CREATE TABLE IF NOT EXISTS slots (
     slot_id      INTEGER PRIMARY KEY,          -- 1 to 24
     battery_uid  TEXT,                         -- UID of battery in slot, NULL if empty
     is_locked    INTEGER NOT NULL DEFAULT 1,   -- 1=locked, 0=unlocked
-    led_state    TEXT    NOT NULL DEFAULT 'OFF',-- 'BLUE','RED','GREEN','WHITE','OFF'
+    slot_state   TEXT    NOT NULL DEFAULT 'OFF',-- 'READY','FAULT','UNLOCKED','CHARGING','OFF'
     charge_level INTEGER NOT NULL DEFAULT 0,   -- 0-100 % (updated by cloud sync)
+    battery_temperature REAL NOT NULL DEFAULT 0.0, -- Battery temperature in Celsius
     is_defective INTEGER NOT NULL DEFAULT 0,   -- 1 if flagged damaged / defective
     last_updated TEXT                          -- ISO-8601 timestamp
 );
@@ -78,9 +79,9 @@ CREATE TABLE IF NOT EXISTS sync_queue (
 """
 
 _SEED_SLOTS_SQL = """
-INSERT OR IGNORE INTO slots (slot_id, battery_uid, is_locked, led_state,
-                              charge_level, is_defective, last_updated)
-VALUES (?, NULL, 1, 'OFF', 0, 0, datetime('now'));
+INSERT OR IGNORE INTO slots (slot_id, battery_uid, is_locked, slot_state,
+                              charge_level, battery_temperature, is_defective, last_updated)
+VALUES (?, NULL, 1, 'OFF', 0, 0.0, 0, datetime('now'));
 """
 
 

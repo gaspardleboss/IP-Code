@@ -21,7 +21,7 @@ from utils.logger import get_logger
 from database.models import init_db
 import database.local_db as db
 from hardware.rfid import RFIDReader
-from hardware.leds import LEDController
+from hardware.pogo import PogoController
 from hardware.gpio_expander import GPIOExpander
 from hardware.slots import SlotController
 import network.api_client as api
@@ -62,8 +62,8 @@ def _handle_return(uid: str, session: dict, slot_ctrl: SlotController) -> None:
     # Confirm battery is physically back in the slot
     if slot_ctrl.is_battery_present(slot_id):
         db.close_session(session["session_id"])
-        db.update_slot(slot_id, led_state="WHITE", is_locked=1)
-        slot_ctrl.set_led(slot_id, config.COLOR_WHITE)
+        db.update_slot(slot_id, slot_state=config.POGO_LED_CHARGING, is_locked=1)
+        slot_ctrl.set_state(slot_id, config.POGO_LED_CHARGING)
         db.log_slot_event(slot_id, "INSERT", {"card_uid": uid, "type": "return"})
         db.enqueue_sync("/api/return", "POST", {
             "card_uid":    uid,
@@ -97,7 +97,7 @@ def _handle_rental_request(uid: str, slot_ctrl: SlotController) -> None:
     # Find the best available slot (highest charge, not defective)
     available_slots = [
         s for s in db.get_all_slots()
-        if s.get("led_state") == "BLUE" and not s.get("is_defective")
+        if s.get("slot_state") == config.POGO_LED_READY and not s.get("is_defective")
     ]
     if not available_slots:
         log.warning("No available slots for offline rental")
@@ -124,9 +124,9 @@ def _execute_rental(uid: str, slot_id: int, session_id: str,
                     battery_uid: str | None, slot_ctrl: SlotController) -> None:
     """Persist the session locally and physically unlock the slot."""
     db.create_session(uid, slot_id, battery_uid, session_id)
-    db.update_slot(slot_id, led_state="GREEN", is_locked=0)
+    db.update_slot(slot_id, slot_state=config.POGO_LED_UNLOCKED, is_locked=0)
     db.log_slot_event(slot_id, "UNLOCK", {"card_uid": uid, "session_id": session_id})
-    slot_ctrl.unlock(slot_id)   # Energises solenoid + sets LED GREEN
+    slot_ctrl.unlock(slot_id)   # Energises solenoid + sets LED UNLOCKED
 
 
 # ===========================================================================
@@ -200,9 +200,9 @@ def _on_battery_inserted(slot_id: int, slot_ctrl: SlotController) -> None:
         # New battery placed by maintenance — start charging monitoring
         slot_data = db.get_slot(slot_id) or {}
         charge = slot_data.get("charge_level", 0)
-        color = config.COLOR_BLUE if charge >= config.BATTERY_CHARGED_THRESHOLD else config.COLOR_WHITE
-        db.update_slot(slot_id, led_state="BLUE" if color == config.COLOR_BLUE else "WHITE")
-        slot_ctrl.set_led(slot_id, color)
+        state = config.POGO_LED_READY if charge >= config.BATTERY_CHARGED_THRESHOLD else config.POGO_LED_CHARGING
+        db.update_slot(slot_id, slot_state=state)
+        slot_ctrl.set_state(slot_id, state)
         db.log_slot_event(slot_id, "INSERT", {"source": "maintenance"})
 
 
@@ -212,8 +212,8 @@ def _on_battery_removed(slot_id: int, slot_ctrl: SlotController) -> None:
     if not session:
         # Unauthorized removal — LED RED, log alert
         log.warning("ALERT: Unauthorized battery removal from slot %d!", slot_id)
-        db.update_slot(slot_id, led_state="RED", is_defective=1)
-        slot_ctrl.set_led(slot_id, config.COLOR_RED)
+        db.update_slot(slot_id, slot_state=config.POGO_LED_FAULT, is_defective=1)
+        slot_ctrl.set_state(slot_id, config.POGO_LED_FAULT)
         db.log_slot_event(slot_id, "REMOVE", {"authorized": False})
     else:
         # Normal rental removal — slot goes GREEN (already set by unlock)
@@ -228,9 +228,9 @@ def _on_battery_removed(slot_id: int, slot_ctrl: SlotController) -> None:
 
 def charging_monitor_loop(slot_ctrl: SlotController) -> None:
     """
-    Every 60 seconds, refresh LED colours from charge levels stored in DB
-    (which are updated by the sync loop from the cloud).
-    Also detects charging anomalies based on time thresholds.
+    Every 60 seconds, reads telemetry from each present battery via pogo pins.
+    Updates the local database with charge level, temperature, and calculates
+    the appropriate state to display on the battery's built-in LEDs.
     """
     log.info("Charging monitor loop started")
     while not _shutdown.is_set():
@@ -239,18 +239,28 @@ def charging_monitor_loop(slot_ctrl: SlotController) -> None:
             for slot in slots:
                 if not slot_ctrl.is_battery_present(slot["slot_id"]):
                     continue
-                if slot.get("is_defective"):
-                    slot_ctrl.set_led(slot["slot_id"], config.COLOR_RED)
-                    continue
-                charge = slot.get("charge_level", 0)
-                if charge >= config.BATTERY_CHARGED_THRESHOLD:
-                    color  = config.COLOR_BLUE
-                    state  = "BLUE"
+                
+                # Read telemetry via pogo pins
+                telemetry = slot_ctrl.read_telemetry(slot["slot_id"])
+                
+                charge = telemetry.get("charge_level", 0)
+                temperature = telemetry.get("temperature", 0.0)
+                fault = telemetry.get("fault", False)
+                is_defective = slot.get("is_defective") or fault
+                
+                if is_defective:
+                    state = config.POGO_LED_FAULT
+                elif charge >= config.BATTERY_CHARGED_THRESHOLD:
+                    state = config.POGO_LED_READY
                 else:
-                    color  = config.COLOR_WHITE
-                    state  = "WHITE"
-                db.update_slot(slot["slot_id"], led_state=state)
-                slot_ctrl.set_led(slot["slot_id"], color)
+                    state = config.POGO_LED_CHARGING
+                    
+                db.update_slot(slot["slot_id"], 
+                               charge_level=charge,
+                               battery_temperature=temperature,
+                               is_defective=1 if is_defective else 0,
+                               slot_state=state)
+                slot_ctrl.set_state(slot["slot_id"], state)
         except Exception as exc:
             log.error("Charging monitor exception: %s", exc)
         time.sleep(60)
@@ -294,9 +304,9 @@ def main() -> None:
     init_db()
 
     # Initialise hardware
-    leds  = LEDController()
+    pogo  = PogoController()
     gpio  = GPIOExpander()           # Also calls lock_all() internally
-    slot_ctrl = SlotController(leds, gpio)
+    slot_ctrl = SlotController(pogo, gpio)
     rfid  = RFIDReader()
 
     # Register OS signal handlers

@@ -1,0 +1,4 @@
+=== T4 Fault Injection ===
+Scenario 1 (Address collision): No exception raised during read_all_detections().
+Scenario 2 (Stuck-bus recovery): Elapsed time 0.320 ms (< 250 ms). SUCCESS.
+Scenario 3 (Power glitch chip A): All outputs reverted to LOW. SUCCESS.

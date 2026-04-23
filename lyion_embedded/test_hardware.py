@@ -3,12 +3,12 @@
 # test_hardware.py — Hardware validation script for Ly-ion RPi controller.
 #
 # Tests (in order):
-#   1. LED strip: cycles all 24 LEDs through each colour
+#   1. Pogo Pins: cycles all 24 battery indicators through each state
 #   2. GPIO expanders: reads all detection inputs, prints state table
 #   3. Solenoid unlock: pulses each slot relay one by one (prompts for confirm)
 #   4. RFID reader: waits for a card tap and prints the UID
 #
-# Run as: python3 test_hardware.py [--leds] [--gpio] [--solenoids] [--rfid]
+# Run as: python3 test_hardware.py [--pogo] [--gpio] [--solenoids] [--rfid]
 # With no arguments, all tests run.
 # =============================================================================
 
@@ -29,35 +29,35 @@ log = get_logger("test_hardware")
 
 
 # ===========================================================================
-# Test 1: LED strip
+# Test 1: Pogo Pins (Battery Indicators)
 # ===========================================================================
-def test_leds():
-    from hardware.leds import LEDController
-    print("\n=== Test 1: LED strip ===")
-    leds = LEDController()
+def test_pogo():
+    from hardware.pogo import PogoController
+    print("\n=== Test 1: Pogo Pins ===")
+    pogo = PogoController()
 
     sequences = [
-        ("ALL OFF",   config.COLOR_OFF),
-        ("ALL BLUE",  config.COLOR_BLUE),
-        ("ALL WHITE", config.COLOR_WHITE),
-        ("ALL RED",   config.COLOR_RED),
-        ("ALL GREEN", config.COLOR_GREEN),
+        ("ALL OFF",      config.POGO_LED_OFF),
+        ("ALL READY",    config.POGO_LED_READY),
+        ("ALL CHARGING", config.POGO_LED_CHARGING),
+        ("ALL FAULT",    config.POGO_LED_FAULT),
+        ("ALL UNLOCKED", config.POGO_LED_UNLOCKED),
     ]
-    for label, color in sequences:
+    for label, state in sequences:
         print(f"  {label} …", end=" ", flush=True)
-        leds.set_all_slots(color)
+        pogo.set_all_states(state)
         time.sleep(1)
         print("OK")
 
-    print("  Cycling slot-by-slot BLUE …")
-    leds.set_all_slots(config.COLOR_OFF)
+    print("  Cycling slot-by-slot READY …")
+    pogo.set_all_states(config.POGO_LED_OFF)
     for slot in range(1, config.NUM_SLOTS + 1):
-        leds.set_slot_color(slot, config.COLOR_BLUE)
+        pogo.set_state(slot, config.POGO_LED_READY)
         time.sleep(0.1)
-        leds.set_slot_color(slot, config.COLOR_OFF)
+        pogo.set_state(slot, config.POGO_LED_OFF)
 
-    leds.set_all_slots(config.COLOR_OFF)
-    print("LED test PASSED ✓")
+    pogo.set_all_states(config.POGO_LED_OFF)
+    print("Pogo pins test PASSED ✓")
 
 
 # ===========================================================================
@@ -134,20 +134,20 @@ def test_rfid():
 # ===========================================================================
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Ly-ion hardware test suite")
-    parser.add_argument("--leds",      action="store_true", help="Run LED test only")
+    parser.add_argument("--pogo",      action="store_true", help="Run Pogo test only")
     parser.add_argument("--gpio",      action="store_true", help="Run GPIO detection test only")
     parser.add_argument("--solenoids", action="store_true", help="Run solenoid relay test only")
     parser.add_argument("--rfid",      action="store_true", help="Run RFID reader test only")
     args = parser.parse_args()
 
-    run_all = not any([args.leds, args.gpio, args.solenoids, args.rfid])
+    run_all = not any([args.pogo, args.gpio, args.solenoids, args.rfid])
 
     print("=" * 50)
     print("  Ly-ion Hardware Test Suite")
     print("=" * 50)
 
     try:
-        if run_all or args.leds:      test_leds()
+        if run_all or args.pogo:      test_pogo()
         if run_all or args.gpio:      test_gpio()
         if run_all or args.solenoids: test_solenoids()
         if run_all or args.rfid:      test_rfid()

@@ -1,0 +1,5 @@
+=== T2 I2C Timing Budget ===
+Theoretical scan time : 2.640 ms
+Simulated scan time   : 0.006 ms
+Slot-monitor period   : 500 ms
+Bus load              : 0.528 %

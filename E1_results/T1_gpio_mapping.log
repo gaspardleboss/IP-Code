@@ -1,0 +1,43 @@
+2026-04-23 16:43:29 [WARNING] test_hardware — Cannot open log file /home/pi/lyion_embedded/lyion.log: [Errno 45] Operation not supported: '/home/pi' — logging to console only
+==================================================
+  Ly-ion Hardware Test Suite
+==================================================
+2026-04-23 16:43:29 [WARNING] hardware.gpio_expander — Cannot open log file /home/pi/lyion_embedded/lyion.log: [Errno 45] Operation not supported: '/home/pi' — logging to console only
+2026-04-23 16:43:29 [WARNING] hardware.gpio_expander — adafruit-circuitpython-mcp230xx not found — GPIO expander in STUB mode
+
+=== Test 2: GPIO expanders (detection inputs) ===
+2026-04-23 16:43:29 [INFO] hardware.gpio_expander — All slots locked (safety reset)
+2026-04-23 16:43:29 [INFO] hardware.gpio_expander — GPIO expander initialised — chips A(0x20), B(0x21), C(0x22)
+  Slot   Battery present?
+  ----   -----------------
+  1      no  (LOW)
+  2      no  (LOW)
+  3      no  (LOW)
+  4      no  (LOW)
+  5      no  (LOW)
+  6      no  (LOW)
+  7      no  (LOW)
+  8      no  (LOW)
+  9      no  (LOW)
+  10     no  (LOW)
+  11     no  (LOW)
+  12     no  (LOW)
+  13     no  (LOW)
+  14     no  (LOW)
+  15     no  (LOW)
+  16     no  (LOW)
+  17     no  (LOW)
+  18     no  (LOW)
+  19     no  (LOW)
+  20     no  (LOW)
+  21     no  (LOW)
+  22     no  (LOW)
+  23     no  (LOW)
+  24     no  (LOW)
+
+  Total batteries detected: 0 / 24
+GPIO detection test PASSED ✓
+
+==================================================
+  All selected tests completed.
+==================================================

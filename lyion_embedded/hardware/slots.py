@@ -6,7 +6,7 @@
 import threading
 from utils.logger import get_logger
 import config
-from hardware.leds import LEDController
+from hardware.pogo import PogoController
 from hardware.gpio_expander import GPIOExpander
 
 log = get_logger(__name__)
@@ -15,11 +15,11 @@ log = get_logger(__name__)
 class SlotController:
     """
     Provides slot-level operations: unlock, detect, and LED update.
-    Uses LEDController and GPIOExpander internally.
+    Uses PogoController and GPIOExpander internally.
     """
 
-    def __init__(self, leds: LEDController, gpio: GPIOExpander):
-        self._leds = leds
+    def __init__(self, pogo: PogoController, gpio: GPIOExpander):
+        self._pogo = pogo
         self._gpio = gpio
         self._lock = threading.Lock()
 
@@ -29,14 +29,14 @@ class SlotController:
 
     def unlock(self, slot_number: int) -> None:
         """
-        Unlock a slot: energise solenoid, flash LED green,
+        Unlock a slot: energise solenoid, set state UNLOCKED via pogo,
         then re-lock solenoid after SOLENOID_UNLOCK_DURATION seconds.
         Runs the solenoid pulse in a background thread so the caller
         is not blocked.
         """
         log.info("SlotController: unlocking slot %d", slot_number)
-        self._leds.pulse_slot(slot_number, config.COLOR_GREEN, duration=0.5)
-        self._leds.set_slot_color(slot_number, config.COLOR_GREEN)
+        self._pogo.set_state(slot_number, config.POGO_LED_UNLOCKED)
+        
         # Run solenoid pulse in background to avoid blocking the RFID loop
         t = threading.Thread(
             target=self._gpio.unlock_slot,
@@ -53,7 +53,7 @@ class SlotController:
     def lock_all(self) -> None:
         """Lock all slots (safety reset)."""
         self._gpio.lock_all()
-        self._leds.set_all_slots(config.COLOR_OFF)
+        self._pogo.set_all_states(config.POGO_LED_OFF)
 
     # ------------------------------------------------------------------
     # Detection
@@ -68,24 +68,16 @@ class SlotController:
         return self._gpio.read_all_detections()
 
     # ------------------------------------------------------------------
-    # LED helpers
+    # Telemetry and State helpers
     # ------------------------------------------------------------------
 
-    def set_led(self, slot_number: int, color: tuple) -> None:
-        self._leds.set_slot_color(slot_number, color)
+    def set_state(self, slot_number: int, state: str) -> None:
+        self._pogo.set_state(slot_number, state)
 
-    def update_leds_from_db(self, slots: list[dict]) -> None:
-        """Bulk-update LEDs from DB slot state records."""
-        self._leds.update_all_from_db(slots)
+    def update_states_from_db(self, slots: list[dict]) -> None:
+        """Bulk-update batteries from DB slot state records."""
+        self._pogo.update_all_from_db(slots)
 
-    def led_state_for_slot(self, slot: dict) -> tuple:
-        """
-        Derive the correct LED colour from a slot record dict.
-        Dict keys: is_defective, charge_level, led_state.
-        """
-        if slot.get("is_defective"):
-            return config.COLOR_RED
-        charge = slot.get("charge_level", 0)
-        if charge >= config.BATTERY_CHARGED_THRESHOLD:
-            return config.COLOR_BLUE
-        return config.COLOR_WHITE
+    def read_telemetry(self, slot_number: int) -> dict:
+        """Read telemetry data via pogo pins."""
+        return self._pogo.read_telemetry(slot_number)

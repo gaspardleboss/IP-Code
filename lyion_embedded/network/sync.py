@@ -83,7 +83,7 @@ def _refresh_slot_states(slot_controller) -> None:
     # Rebuild LED colours from the refreshed DB data
     if slot_controller is not None:
         all_slots = db.get_all_slots()
-        slot_controller.update_leds_from_db(all_slots)
+        slot_controller.update_states_from_db(all_slots)
     log.debug("Slot states refreshed from cloud (%d slots)", len(remote_slots))
 
 

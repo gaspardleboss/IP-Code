@@ -10,18 +10,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # ---------------------------------------------------------------------------
-# Neopixel (WS2812B) LED strip
+# Pogo Pin LED State Constants
 # ---------------------------------------------------------------------------
-NEOPIXEL_PIN = 18          # GPIO pin (PWM-capable) driving the LED data line
-NEOPIXEL_COUNT = 24        # Total number of LEDs (one per slot)
-NEOPIXEL_BRIGHTNESS = 255  # 0-255 global brightness
-
-# LED color constants (R, G, B)
-COLOR_BLUE  = (0,   0,   255)   # Battery present, charged (>80%), available
-COLOR_RED   = (255, 0,   0)     # Battery present but NOT rentable
-COLOR_GREEN = (0,   255, 0)     # Slot unlocked / battery removed by user
-COLOR_WHITE = (30,  30,  30)    # Battery present, currently charging (<80%)
-COLOR_OFF   = (0,   0,   0)     # Slot empty and locked (maintenance / no battery)
+POGO_LED_READY     = "READY"     # Battery charged (>80%) - Blue solid
+POGO_LED_FAULT     = "FAULT"     # Defective / Anomaly - Red flashing
+POGO_LED_UNLOCKED  = "UNLOCKED"  # Slot unlocked - Green solid
+POGO_LED_CHARGING  = "CHARGING"  # Charging (<80%) - Cyan pulsed
+POGO_LED_OFF       = "OFF"       # Unused / slot empty
 
 # ---------------------------------------------------------------------------
 # RFID reader (RC522 / MFRC522 via SPI)
