@@ -1,0 +1,7 @@
+### Database Seed Summary (SQLite)
+- `slots`: 24 rows (1 station equivalent)
+- `allowed_cards`: 30 rows
+- `sessions`: 50 rows
+- `slot_logs`: 200 rows
+- `sync_queue`: 0 rows
+- `batteries`: 20 (represented within `slots` table)

@@ -18,7 +18,7 @@ export default function RentConfirmScreen({ route, navigation }) {
       const result = await requestRent(stationId);
       Alert.alert(
         "Emplacement déverrouillé !",
-        `L'emplacement ${result.slot} s'ouvre. Retirez votre batterie. Charge : ${result.battery_charge ?? "?"}%`,
+        `L'emplacement ${result.slot} s'ouvre. Retirez votre batterie. Charge : ${result.battery_charge ?? "?"}%\n\nRappel : Vous avez 1h d'utilisation gratuite, puis 24h maximum pour rendre la batterie sinon une caution sera prélevée.`,
         [{ text: "OK", onPress: () => navigation.navigate("Rental") }],
       );
     } catch (err) {
@@ -39,9 +39,8 @@ export default function RentConfirmScreen({ route, navigation }) {
       </View>
 
       <Text style={styles.notice}>
-        Un dépôt de garantie sera retenu sur votre compte jusqu'au retour de la batterie.
+        Vous avez 1h d'utilisation gratuite avant de devoir rendre la batterie et 24h pour rendre la batterie sinon une caution sera prélevée.
       </Text>
-
       <TouchableOpacity
         style={[styles.button, loading && styles.buttonDisabled]}
         onPress={handleConfirm}

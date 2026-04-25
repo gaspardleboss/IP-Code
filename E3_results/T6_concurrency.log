@@ -1,0 +1,17 @@
+### Concurrency Benchmark Summary
+**Reader Thread (SELECT)**
+  - Total queries: 1000 / 1000
+  - Mean latency:   66.22 µs
+  - Median latency: 61.44 µs
+  - P95 latency:    118.76 µs
+  - P99 latency:    189.96 µs
+  - Max latency:    1681.88 µs
+  - SQLITE_BUSY:    0
+**Writer Thread (UPDATE)**
+  - Total queries: 500 / 500
+  - Mean latency:   68.41 µs
+  - Median latency: 54.81 µs
+  - P95 latency:    165.71 µs
+  - P99 latency:    272.54 µs
+  - Max latency:    2329.54 µs
+  - SQLITE_BUSY:    0

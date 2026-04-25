@@ -1,0 +1,5 @@
+### Integrity Test Outcomes (SQLite)
+✓ PASS | 1. Referential integrity (App logic blocked deletion of card with active session)
+✓ PASS | 2. Uniqueness (IntegrityError raised on duplicate card_uid)
+✓ PASS | 3. Enum validity (App logic blocked invalid slot_state)
+✓ PASS | 4. WAL mode (journal_mode is wal)

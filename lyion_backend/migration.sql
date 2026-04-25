@@ -81,3 +81,13 @@ CREATE INDEX IF NOT EXISTS idx_sessions_student_id ON sessions(student_id);
 CREATE INDEX IF NOT EXISTS idx_sessions_status      ON sessions(status);
 CREATE INDEX IF NOT EXISTS idx_slot_logs_slot_id    ON slot_logs(slot_id);
 CREATE INDEX IF NOT EXISTS idx_students_card_uid    ON students(card_uid);
+
+-- Seed demo user
+INSERT INTO students (student_number, name, email, password_hash, is_active)
+VALUES (
+    'g.vancompernolle@ecam.fr', 
+    'Gaspard Vancompernolle', 
+    'g.vancompernolle@ecam.fr', 
+    'pbkdf2:sha256:600000$demo$70619a912b11e36c7bffc854578cff187f88dea87f368d9f08291fb7f1f0b955', 
+    TRUE
+) ON CONFLICT DO NOTHING;

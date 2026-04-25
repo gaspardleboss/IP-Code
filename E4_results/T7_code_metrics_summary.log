@@ -1,0 +1,21 @@
+=== Code Metrics Summary ===
+
+[lyion_embedded]
+  LOC:       1576
+  Functions: 61
+  Classes:   6
+  TODOs:     0
+
+[lyion_backend]
+  LOC:       821
+  Functions: 39
+  Classes:   10
+  TODOs:     0
+
+[lyion_app]
+  LOC:       757
+  Functions: 0
+  Classes:   0
+  TODOs:     0
+
+GRAND TOTAL LOC: 3154

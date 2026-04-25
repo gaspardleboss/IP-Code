@@ -1,0 +1,13 @@
+req_id,req_label,module,status
+R-FUN-01,RFID card scan triggers rental,lyion_embedded/main.py::rfid_loop,VERIFIED
+R-FUN-02,Solenoid unlocks the assigned slot,lyion_embedded/hardware/gpio_expander.py::unlock_slot,VERIFIED
+R-FUN-03,Battery presence is detected on insertion/removal,lyion_embedded/main.py::slot_monitor_loop,VERIFIED
+R-FUN-04,Charging state is tracked and exposed via LED,lyion_embedded/main.py::charging_monitor_loop,VERIFIED
+R-FUN-05,Rental sessions are persisted locally,lyion_embedded/database/local_db.py::create_session,VERIFIED
+R-FUN-06,Local DB synchronises with cloud when online,lyion_embedded/network/sync.py::run_sync_cycle,VERIFIED
+R-FUN-07,Offline rental fallback via allowed_cards cache,lyion_embedded/main.py::_handle_rental_request,VERIFIED
+R-FUN-08,Cloud REST API exposes rent/return endpoints,lyion_backend/routes/*,VERIFIED
+R-FUN-09,Mobile app shows real-time slot availability,lyion_app/src/screens/*,MISSING
+R-FUN-10,Hardware abstraction allows hardware-less simulation,lyion_embedded/hardware/gpio_expander.py::_StubMCP,VERIFIED
+R-FUN-11,Anomalies are logged and slot flagged FAULT,lyion_embedded/main.py::_on_battery_removed,VERIFIED
+R-FUN-12,Concurrent threads cooperate without locking the DB,lyion_embedded/database/models.py (WAL mode),VERIFIED
