@@ -1,7 +1,0 @@
-.DS_Store
-.venv/
-lyion_embedded/.venv/
-__pycache__/
-*.pyc
-node_modules/
-.expo/

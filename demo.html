@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ly-ion App - Demo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00F0FF;
+            --secondary: #7000FF;
+            --bg-color: #0A0A0F;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E9F;
+            --danger: #FF3366;
+            --success: #00E676;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Ambient Background */
+        .ambient-light {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: -1;
+            animation: float 10s infinite ease-in-out alternate;
+        }
+
+        .light-1 {
+            background: rgba(112, 0, 255, 0.15);
+            top: -10%;
+            left: -10%;
+        }
+
+        .light-2 {
+            background: rgba(0, 240, 255, 0.1);
+            bottom: -20%;
+            right: -10%;
+            animation-delay: -5s;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            100% {
+                transform: translate(50px, 50px) scale(1.1);
+            }
+        }
+
+        /* Mobile Container */
+        .mobile-frame {
+            width: 100%;
+            max-width: 400px;
+            height: 850px;
+            max-height: 95vh;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 40px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .view {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(50px);
+        }
+
+        .view.active {
+            opacity: 1;
+            pointer-events: all;
+            transform: translateX(0);
+        }
+
+        /* Typography & Utilities */
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--text-main) 0%, var(--text-muted) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+            line-height: 1.5;
+        }
+
+        .spacer {
+            flex: 1;
+        }
+
+        /* Form Elements */
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 16px 20px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 18px;
+            border-radius: 16px;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            box-shadow: 0 10px 20px rgba(112, 0, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px rgba(112, 0, 255, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* Status Banner */
+        .status-banner {
+            background: rgba(255, 51, 102, 0.1);
+            border: 1px solid rgba(255, 51, 102, 0.2);
+            color: var(--danger);
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            display: none;
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            75% {
+                transform: translateX(5px);
+            }
+        }
+
+        /* Dashboard Cards */
+        .card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Success Animation */
+        .success-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: rgba(0, 230, 118, 0.1);
+            border: 2px solid var(--success);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            box-shadow: 0 0 30px rgba(0, 230, 118, 0.2);
+            animation: pulseSuccess 2s infinite;
+        }
+
+        .success-circle svg {
+            width: 50px;
+            height: 50px;
+            fill: none;
+            stroke: var(--success);
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
+            animation: drawCheck 0.6s 0.2s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+
+        @keyframes drawCheck {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        @keyframes pulseSuccess {
+            0% {
+                box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 20px rgba(0, 230, 118, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(0, 230, 118, 0);
+            }
+        }
+
+        .info-box {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 30px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .info-box p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .info-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        .highlight {
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        /* Loader */
+        .loader {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="ambient-light light-1"></div>
+    <div class="ambient-light light-2"></div>
+
+    <div class="mobile-frame">
+        <!-- LOGIN VIEW -->
+        <div id="view-login" class="view active">
+            <div style="margin-top: 40px; margin-bottom: 60px;">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="url(#gradient)" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 20px;">
+                    <defs>
+                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#00F0FF" />
+                            <stop offset="100%" stop-color="#7000FF" />
+                        </linearGradient>
+                    </defs>
+                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                </svg>
+                <h1>Ly-ion</h1>
+                <p class="subtitle">La puissance partagée pour les étudiants de l'ECAM.</p>
+            </div>
+
+            <div id="login-error" class="status-banner">
+                Identifiants incorrects.
+            </div>
+
+            <div class="input-group">
+                <label>Adresse Email</label>
+                <input type="email" id="email" value="g.vancompernolle@ecam.fr" placeholder="prenom.nom@ecam.fr">
+            </div>
+
+            <div class="input-group">
+                <label>Mot de passe</label>
+                <input type="password" id="password" value="123" placeholder="••••••••">
+            </div>
+
+            <div class="spacer"></div>
+
+            <button class="btn btn-primary" id="btn-login" onclick="handleLogin()">
+                <span class="btn-text">Se connecter</span>
+                <div class="loader"></div>
+            </button>
+        </div>
+
+        <!-- DASHBOARD VIEW -->
+        <div id="view-home" class="view">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; margin-top: 20px;">
+                <div>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">Bienvenue,</p>
+                    <h2 style="font-size: 1.5rem;">Gaspard</h2>
+                </div>
+                <div
+                    style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; font-weight: bold;">
+                    G
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="stat-label">Batteries en cours de location</div>
+                <div class="stat-value">0</div>
+                <p style="color: var(--success); font-size: 0.85rem; margin-top: 5px;">Aucune pénalité active</p>
+            </div>
+
+            <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div class="stat-label">Station ECAM</div>
+                    <div style="font-weight: 600; font-size: 1.1rem; margin-top: 5px;">14 / 24 dispo</div>
+                </div>
+                <svg width="24" height="24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z" />
+                    <circle cx="12" cy="10" r="3" />
+                </svg>
+            </div>
+
+            <div class="spacer"></div>
+
+            <button class="btn btn-primary" id="btn-rent" onclick="handleRental()">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" class="btn-icon">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                <span class="btn-text">Déverrouiller une batterie</span>
+                <div class="loader"></div>
+            </button>
+        </div>
+
+        <!-- SUCCESS VIEW -->
+        <div id="view-success" class="view" style="text-align: center; justify-content: center;">
+            <div class="success-circle">
+                <svg viewBox="0 0 24 24">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            </div>
+
+            <h2 style="font-size: 2rem; margin-bottom: 10px;">C'est parti !</h2>
+            <p style="color: var(--text-muted); font-size: 1.1rem;">La batterie <span
+                    style="color: var(--text-main); font-weight: bold;">BATT-TEST-01</span> a été déverrouillée au <span
+                    style="color: var(--primary); font-weight: bold;">Slot #4</span>.</p>
+
+            <div class="info-box" style="text-align: left;">
+                <p>⚡ <span class="highlight">1h d'utilisation gratuite</span> incluse.</p>
+                <p>⏳ Vous avez <span class="highlight">24h maximum</span> pour rendre la batterie, sinon une caution de
+                    50€ sera prélevée.</p>
+            </div>
+
+            <div class="spacer"></div>
+
+            <button class="btn btn-primary" onclick="switchView('view-home')"
+                style="background: rgba(255,255,255,0.1); box-shadow: none;">
+                Retour à l'accueil
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function switchView(viewId) {
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+        }
+
+        function setLoading(btnId, isLoading) {
+            const btn = document.getElementById(btnId);
+            const text = btn.querySelector('.btn-text');
+            const icon = btn.querySelector('.btn-icon');
+            const loader = btn.querySelector('.loader');
+
+            btn.disabled = isLoading;
+            if (isLoading) {
+                if (text) text.style.display = 'none';
+                if (icon) icon.style.display = 'none';
+                if (loader) loader.style.display = 'block';
+            } else {
+                if (text) text.style.display = 'block';
+                if (icon) icon.style.display = 'block';
+                if (loader) loader.style.display = 'none';
+            }
+        }
+
+        function handleLogin() {
+            const email = document.getElementById('email').value;
+            const pwd = document.getElementById('password').value;
+            const errorBanner = document.getElementById('login-error');
+
+            errorBanner.style.display = 'none';
+            setLoading('btn-login', true);
+
+            // Simuler l'appel API
+            setTimeout(() => {
+                setLoading('btn-login', false);
+                if (email === 'g.vancompernolle@ecam.fr' && pwd === '123') {
+                    switchView('view-home');
+                } else {
+                    errorBanner.style.display = 'block';
+                }
+            }, 1000);
+        }
+
+        function handleRental() {
+            setLoading('btn-rent', true);
+
+            // Simuler la communication avec la Raspberry Pi / DB
+            setTimeout(() => {
+                setLoading('btn-rent', false);
+                switchView('view-success');
+            }, 1500);
+        }
+    </script>
+</body>
+
+</html>
